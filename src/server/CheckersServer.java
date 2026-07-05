@@ -5,8 +5,12 @@ import java.net.Socket;
 
 public class CheckersServer {
     public static void main(String[] args) {
-
-        System.out.println("Server started");
-
+        try {
+        ServerSocket server = new ServerSocket(5000);
+        System.out.println("Server is waiting for a player...");
+        }
+        catch (Exception e) {
+        e.printStackTrace();
+        }
     }
 }
