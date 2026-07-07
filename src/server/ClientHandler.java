@@ -46,7 +46,7 @@ public class ClientHandler {
                 break;
             }
 
-            System.out.println("Client says: " + message);
+            processMessage(message);
         }
 
     }
@@ -61,6 +61,24 @@ public class ClientHandler {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    private void processMessage(String message) {
+
+        switch (message) {
+
+            case Protocol.JOIN:
+                System.out.println("Player joined.");
+                break;
+
+            case Protocol.QUIT:
+                System.out.println("Player quit.");
+                break;
+
+            default:
+                System.out.println("Client says: " + message);
+                break;
         }
     }
 }

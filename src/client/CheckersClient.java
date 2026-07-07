@@ -8,6 +8,8 @@ import java.io.PrintWriter;
 
 import common.Protocol;
 
+import java.util.Scanner;
+
 public class CheckersClient {
 
     private Socket client;
@@ -37,6 +39,16 @@ public class CheckersClient {
 
         else {
             System.out.println("Unknown message: " + message);
+        }
+
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+
+            String input = scanner.nextLine();
+
+            sendMessage(input);
+
         }
     }
 
