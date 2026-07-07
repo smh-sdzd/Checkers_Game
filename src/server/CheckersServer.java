@@ -18,6 +18,8 @@ public class CheckersServer {
         Socket client = server.accept();
         System.out.println("A player connected!");
 
+        ClientHandler handler = new ClientHandler(client);
+        
         BufferedReader in =
             new BufferedReader(
                 new InputStreamReader(client.getInputStream()));
