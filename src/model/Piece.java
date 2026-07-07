@@ -1,0 +1,79 @@
+package model;
+
+import java.io.Serializable;
+
+    public class Piece implements Serializable {
+        public enum Color { BLACK, RED }
+        public enum Type { NORMAL, KING }
+
+        private Color color;
+        private Type type;
+        private int row, col;
+
+
+        public Piece(Color color, int row, int col) {
+            this.color = color;
+            this.type = Type.NORMAL;
+            this.row = row;
+            this.col = col;
+        }
+
+
+        public Color getColor() {
+            return color;
+        }
+        public void setColor(Color color) {
+            this.color = color;
+        }
+
+
+        public Type getType() {
+            return type;
+        }
+        public void setType(Type type) {
+            this.type = type;
+        }
+
+
+        public int getRow() {
+            return row;
+        }
+        public void setRow(int row) {
+            this.row = row;
+        }
+
+
+        public int getCol() {
+            return col;
+        }
+        public void setCol(int col) {
+            this.col = col;
+        }
+
+
+        public void makeKing() {
+            this.type = Type.KING;
+        }
+
+
+        public boolean isRed() {
+            return this.color == Color.RED;
+        }
+        public boolean isBlack() {
+            return this.color == Color.BLACK;
+        }
+
+
+        public int getForwardDirection() {
+            return (this.color == Color.RED) ? 1 : -1;
+        }
+
+
+        // make copy to determine whether a move can be executed
+        public Piece copy() {
+            Piece copy = new Piece(this.color, this.row, this.col);
+            copy.type = this.type;
+            return copy;
+        }
+    }
+
