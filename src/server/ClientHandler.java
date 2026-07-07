@@ -37,9 +37,17 @@ public class ClientHandler {
 
         sendMessage(Protocol.WELCOME);
 
-        String message = receiveMessage();
+        while (true) {
 
-        System.out.println("Client says: " + message);
+            String message = receiveMessage();
+
+            if (message == null) {
+                System.out.println("Client disconnected.");
+                break;
+            }
+
+            System.out.println("Client says: " + message);
+        }
 
     }
 
