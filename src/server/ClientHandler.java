@@ -6,6 +6,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
+import common.Protocol;
+
 public class ClientHandler {
 
     private Socket client;
@@ -33,17 +35,24 @@ public class ClientHandler {
 
     public void handleClient() {
 
+        sendMessage(Protocol.WELCOME);
+
+        String message = receiveMessage();
+
+        System.out.println("Client says: " + message);
+
+    }
+
+    public void sendMessage(String message){
+        out.println(message);
+    }
+
+    public String receiveMessage(){
         try {
-
-            out.println("Welcome to Checkers!");
-
-            String message = in.readLine();
-
-            System.out.println("Client says: " + message);
-
-        }
-        catch (Exception e) {
+            return in.readLine();
+        } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
     }
 }

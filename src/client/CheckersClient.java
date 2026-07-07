@@ -6,6 +6,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
+import common.Protocol;
+
 public class CheckersClient {
     public static void main(String[] args) {
         try {
@@ -23,7 +25,13 @@ public class CheckersClient {
             out.println("Hello Server!");
             
             String message = in.readLine();
-            System.out.println(message);
+
+            if (Protocol.WELCOME.equals(message)) {
+                System.out.println("Server welcomed me!");
+            }
+            else {
+                System.out.println("Unknown message: " + message);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();

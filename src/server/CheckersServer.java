@@ -15,12 +15,16 @@ public class CheckersServer {
         System.out.println("Server started.");
         System.out.println("Waiting for a player to connect...");
         
-        Socket client = server.accept();
-        System.out.println("A player connected!");
+        while (true) {
 
-        ClientHandler handler = new ClientHandler(client);
+            Socket client = server.accept();
 
-        handler.handleClient();
+            System.out.println("A player connected!");
+
+            ClientHandler handler = new ClientHandler(client);
+
+            handler.handleClient();
+        }
 
         }
         catch (Exception e) {
