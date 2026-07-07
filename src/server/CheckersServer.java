@@ -19,18 +19,8 @@ public class CheckersServer {
         System.out.println("A player connected!");
 
         ClientHandler handler = new ClientHandler(client);
-        
-        BufferedReader in =
-            new BufferedReader(
-                new InputStreamReader(client.getInputStream()));
 
-        PrintWriter out =
-            new PrintWriter(client.getOutputStream(), true);
-
-        out.println("Welcome to Checkers!");
-
-        String message = in.readLine();
-        System.out.println("Client says: " + message);
+        handler.handleClient();
 
         }
         catch (Exception e) {
