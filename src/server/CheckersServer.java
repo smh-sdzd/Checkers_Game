@@ -3,28 +3,51 @@ package server;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-
 public class CheckersServer {
+
+    private ServerSocket server;
+    private static final int PORT = 5000;
+
     public static void main(String[] args) {
+
+        CheckersServer checkersServer = new CheckersServer();
+        checkersServer.startServer();
+
+    }
+
+    public void startServer() {
+
         try {
-        ServerSocket server = new ServerSocket(5000);
 
-        System.out.println("Server started.");
-        System.out.println("Waiting for a player to connect...");
-        
-        while (true) {
+            server = new ServerSocket(PORT);
 
-            Socket client = server.accept();
+            System.out.println("Server started.");
+            System.out.println("Waiting for a player to connect...");
 
-            System.out.println("A player connected!");
+            acceptClients();
 
-            ClientHandler handler = new ClientHandler(client);
-
-            handler.handleClient();
         }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void acceptClients() {
+
+        try {
+
+            while (true) {
+
+                Socket client = server.accept();
+
+                System.out.println("A player connected!");
+
+                ClientHandler handler = new ClientHandler(client);
+
+                handler.handleClient();
+
+            }
 
         }
         catch (Exception e) {
