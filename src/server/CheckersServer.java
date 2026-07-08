@@ -45,7 +45,9 @@ public class CheckersServer {
 
                 ClientHandler handler = new ClientHandler(client);
 
-                handler.handleClient();
+                Thread thread = new Thread(handler);
+
+                thread.start();
 
             }
 

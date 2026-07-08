@@ -8,7 +8,7 @@ import java.io.PrintWriter;
 
 import common.Protocol;
 
-public class ClientHandler {
+public class ClientHandler implements Runnable {
 
     private Socket client;
     private BufferedReader in;
@@ -80,5 +80,11 @@ public class ClientHandler {
                 System.out.println("Client says: " + message);
                 break;
         }
+    }
+
+    @Override
+
+    public void run() {
+        handleClient();
     }
 }
