@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
 import common.Protocol;
+import game.Game;
 
 public class ClientHandler implements Runnable {
 
@@ -14,10 +15,14 @@ public class ClientHandler implements Runnable {
     private BufferedReader in;
     private PrintWriter out;
     private String playerName;
+    private CheckersServer server;
+    private Game game;
 
-    public ClientHandler(Socket client) {
+
+    public ClientHandler(Socket client, CheckersServer server) {
 
         this.client = client;
+        this.server = server;
 
         try {
 
@@ -38,6 +43,8 @@ public class ClientHandler implements Runnable {
 
         sendMessage(Protocol.WELCOME);
 
+        server.pairPlayer(this); 
+
         while (true) {
 
             String message = receiveMessage();
@@ -50,6 +57,14 @@ public class ClientHandler implements Runnable {
             processMessage(message);
         }
 
+    }
+
+    public void setGame(Game game) {
+        this.game = game;
+    }
+
+    public Game getGame() {
+        return game;
     }
 
     public void sendMessage(String message){
@@ -84,7 +99,6 @@ public class ClientHandler implements Runnable {
     }
 
     @Override
-
     public void run() {
         handleClient();
     }
