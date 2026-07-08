@@ -13,6 +13,7 @@ public class ClientHandler implements Runnable {
     private Socket client;
     private BufferedReader in;
     private PrintWriter out;
+    private String playerName;
 
     public ClientHandler(Socket client) {
 
