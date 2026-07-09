@@ -22,4 +22,11 @@ public class Game {
         return player2;
     }
 
+    public void sendToOpponent(ClientHandler sender, String move) {
+        if (sender == player1) {
+            player2.sendMessage(move);
+        } else {
+            player1.sendMessage(move);
+        }
+    }
 }

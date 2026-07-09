@@ -41,6 +41,8 @@ public class CheckersClient {
             System.out.println("Unknown message: " + message);
         }
 
+        startReceiver();
+
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
@@ -89,5 +91,27 @@ public class CheckersClient {
             return null;
 
         }
+    }
+
+    private void startReceiver() {
+
+        Thread receiver = new Thread(() -> {
+
+            while (true) {
+
+                String message = receiveMessage();
+
+                if (message == null) {
+                    System.out.println("Disconnected from server.");
+                    break;
+                }
+
+                System.out.println("Server: " + message);
+
+            }
+
+        });
+
+        receiver.start();
     }
 }

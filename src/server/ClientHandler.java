@@ -82,6 +82,15 @@ public class ClientHandler implements Runnable {
 
     private void processMessage(String message) {
 
+        if (message.startsWith(Protocol.MOVE)) {
+
+            if (game != null) {
+                game.sendToOpponent(this, message);
+            }
+
+            return;
+        }
+
         switch (message) {
 
             case Protocol.JOIN:
