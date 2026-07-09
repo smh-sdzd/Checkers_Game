@@ -3,6 +3,13 @@ package model;
 import java.io.Serializable;
 
     public class Piece implements Serializable {
+
+        public boolean isKing() {
+
+                return this.type == Type.KING;
+
+        }
+
         public enum Color { BLACK, RED }
         public enum Type { NORMAL, KING }
 
@@ -65,9 +72,8 @@ import java.io.Serializable;
 
 
         public int getForwardDirection() {
-            return (this.color == Color.RED) ? 1 : -1;
+            return (this.color == Color.RED) ? -1 : 1;   // RED ← بالا، BLACK ← پایین
         }
-
 
         // make copy to determine whether a move can be executed
         public Piece copy() {
