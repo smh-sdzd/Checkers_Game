@@ -2,11 +2,12 @@ package server;
 
 import java.net.Socket;
 
+import common.Protocol;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
-import common.Protocol;
 import game.Game;
 
 public class ClientHandler implements Runnable {
@@ -40,23 +41,19 @@ public class ClientHandler implements Runnable {
     }
 
     public void handleClient() {
-
         sendMessage(Protocol.WELCOME);
-
-        server.pairPlayer(this); 
-
+        server.pairPlayer(this);
         while (true) {
-
             String message = receiveMessage();
-
             if (message == null) {
                 System.out.println("Client disconnected.");
                 break;
             }
-
             processMessage(message);
         }
-
+        if (game != null) {
+            game.opponentLeft(this);   // notify the other player
+        }
     }
 
     public void setGame(Game game) {
@@ -81,31 +78,41 @@ public class ClientHandler implements Runnable {
     }
 
     private void processMessage(String message) {
-
+        if (message.equals(Protocol.CREATE)) {
+            String code = server.createRoom(this);
+            sendMessage(Protocol.ROOM + " " + code);   // tell player 1 their code
+            return;
+        }
+        if (message.startsWith(Protocol.JOIN + " ")) {
+            String code = message.substring(5).trim();
+            boolean ok = server.joinRoom(code, this);
+            if (!ok) sendMessage(Protocol.BAD_ROOM);
+            return;
+        }
         if (message.startsWith(Protocol.MOVE)) {
-
-            if (game != null) {
-                game.sendToOpponent(this, message);
-            }
-
+            if (game != null) game.handleMove(this, message);
             return;
         }
 
+        if (message.startsWith(Protocol.MOVE)) {
+            if (game != null) {
+                game.handleMove(this, message);   // was sendToOpponent
+            }
+            return;
+        }
         switch (message) {
-
             case Protocol.JOIN:
                 System.out.println("Player joined.");
                 break;
-
             case Protocol.QUIT:
                 System.out.println("Player quit.");
                 break;
-
             default:
                 System.out.println("Client says: " + message);
                 break;
         }
     }
+
 
     @Override
     public void run() {

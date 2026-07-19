@@ -2,15 +2,20 @@ package server;
 
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import game.Game;
 
 public class CheckersServer {
 
     private ServerSocket server;
-    private static final int PORT = 5000;
+    private static final int PORT = 12345;
 
     private ClientHandler waitingPlayer;
+
+    private final Map<String, ClientHandler> rooms = new ConcurrentHashMap<>();
 
     public static void main(String[] args) {
 
@@ -62,27 +67,33 @@ public class CheckersServer {
     }
 
     public synchronized void pairPlayer(ClientHandler handler) {
-
         if (waitingPlayer == null) {
-
             waitingPlayer = handler;
             handler.sendMessage(common.Protocol.WAIT);
-
-        }
-        else {
-
+        } else {
             Game game = new Game(waitingPlayer, handler);
-
             waitingPlayer.setGame(game);
             handler.setGame(game);
-
             System.out.println("Game created between two players!");
-
-            waitingPlayer.sendMessage(common.Protocol.YOUR_TURN);
-            handler.sendMessage(common.Protocol.WAIT);
-
+            game.start();          // sends colors, START, and first turn
             waitingPlayer = null;
-
         }
     }
+
+    public synchronized String createRoom(ClientHandler handler) {
+        String code = UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+        rooms.put(code, handler);
+        return code;
+    }
+
+    public synchronized boolean joinRoom(String code, ClientHandler handler) {
+        ClientHandler creator = rooms.remove(code);
+        if (creator == null) return false;
+        Game game = new Game(creator, handler);
+        creator.setGame(game);
+        handler.setGame(game);
+        game.start();
+        return true;
+    }
+
 }

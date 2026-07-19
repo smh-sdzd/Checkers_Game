@@ -5,10 +5,9 @@ import java.net.Socket;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.Scanner;
 
 import common.Protocol;
-
-import java.util.Scanner;
 
 public class CheckersClient {
 
