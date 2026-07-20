@@ -5,130 +5,141 @@ import java.util.List;
 
 public class GameLogic {
 
+    /**
+     * Returns all valid moves for a piece at given position.
+     * Includes both normal and capture moves.
+     */
     public static List<Move> getValidMovesForPiece(Board board, int row, int col) {
         List<Move> moves = new ArrayList<>();
         Piece piece = board.getPieceAt(row, col);
         if (piece == null) return moves;
 
-        int[][] directions = getMoveDirections(piece);
+        int[][] dirs = getMoveDirections(piece);
+        for (int[] d : dirs) {
+            int dr = d[0], dc = d[1];
+            int nr = row + dr, nc = col + dc;
 
-        for (int[] dir : directions) {
-            int dr = dir[0];
-            int dc = dir[1];
-            int newRow = row + dr;
-            int newCol = col + dc;
-
-            if (board.isValidPosition(newRow, newCol) && board.isEmpty(newRow, newCol)) {
-                moves.add(new Move(row, col, newRow, newCol, Move.MoveType.NORMAL));
+            // Normal move
+            if (board.isValidPosition(nr, nc) && board.isEmpty(nr, nc)) {
+                moves.add(new Move(row, col, nr, nc, Move.MoveType.NORMAL));
             }
 
-            int jumpRow = row + 2 * dr;
-            int jumpCol = col + 2 * dc;
-            int middleRow = row + dr;
-            int middleCol = col + dc;
-
-            if (board.isValidPosition(jumpRow, jumpCol) && board.isEmpty(jumpRow, jumpCol)) {
-                Piece middlePiece = board.getPieceAt(middleRow, middleCol);
-                if (middlePiece != null && middlePiece.getColor() != piece.getColor()) {
-                    moves.add(new Move(row, col, jumpRow, jumpCol, Move.MoveType.CAPTURE));
+            // Capture move (jump over opponent)
+            int jr = row + 2 * dr, jc = col + 2 * dc;
+            int mr = row + dr, mc = col + dc;
+            if (board.isValidPosition(jr, jc) && board.isEmpty(jr, jc)) {
+                Piece mid = board.getPieceAt(mr, mc);
+                if (mid != null && mid.getColor() != piece.getColor()) {
+                    moves.add(new Move(row, col, jr, jc, Move.MoveType.CAPTURE));
                 }
             }
         }
         return moves;
     }
 
+    /**
+     * Returns all valid moves for a player. Capture moves are mandatory.
+     */
     public static List<Move> getAllValidMovesForPlayer(Board board, Piece.Color color) {
-        List<Move> allMoves = new ArrayList<>();
-        List<Move> captureMoves = new ArrayList<>();
+        List<Move> all = new ArrayList<>();
+        List<Move> captures = new ArrayList<>();
 
-        for (int r = 0; r < 8; r++) {
+        for (int r = 0; r < 8; r++)
             for (int c = 0; c < 8; c++) {
                 Piece p = board.getPieceAt(r, c);
                 if (p != null && p.getColor() == color) {
-                    List<Move> pieceMoves = getValidMovesForPiece(board, r, c);
-                    for (Move move : pieceMoves) {
-                        allMoves.add(move);
-                        if (move.isCapture()) captureMoves.add(move);
+                    for (Move m : getValidMovesForPiece(board, r, c)) {
+                        all.add(m);
+                        if (m.isCapture()) captures.add(m);
                     }
                 }
             }
-        }
 
-        if (!captureMoves.isEmpty()) return captureMoves;
-        return allMoves;
+        // Mandatory capture: if any capture exists, only those are valid
+        return captures.isEmpty() ? all : captures;
     }
 
     public static boolean hasAnyCaptureMoveForPiece(Board board, int row, int col) {
-        List<Move> moves = getValidMovesForPiece(board, row, col);
-        for (Move move : moves) {
-            if (move.isCapture()) return true;
-        }
+        for (Move m : getValidMovesForPiece(board, row, col))
+            if (m.isCapture()) return true;
         return false;
     }
 
+    /**
+     * Executes a move and returns a new GameState.
+     * Handles capture, promotion, and chain capture logic.
+     */
     public static GameState applyMove(GameState state, Move move) {
         GameState newState = state.copy();
         Board board = newState.getBoard();
 
         Piece piece = board.getPieceAt(move.getFromRow(), move.getFromCol());
-        if (piece == null) throw new IllegalArgumentException("No piece at source position!");
+        if (piece == null) throw new IllegalArgumentException("No piece at source!");
 
+        // Move piece
         board.removePiece(move.getFromRow(), move.getFromCol());
         board.setPieceAt(move.getToRow(), move.getToCol(), piece);
 
+        // Handle capture
         if (move.isCapture()) {
-            int capturedRow = move.getCapturedRow();
-            int capturedCol = move.getCapturedCol();
-            board.removePiece(capturedRow, capturedCol);
+            board.removePiece(move.getCapturedRow(), move.getCapturedCol());
             newState.addMoveToHistory(move);
         } else {
             newState.addMoveToHistory(move);
         }
 
+        // Check for promotion
         checkAndPromote(board, move.getToRow(), move.getToCol());
 
+        // Chain capture: if piece can capture again, don't switch turn
         boolean canCaptureAgain = hasAnyCaptureMoveForPiece(board, move.getToRow(), move.getToCol());
-        if (!canCaptureAgain) {
+        if (!canCaptureAgain || !move.isCapture()) {
             newState.switchTurn();
         }
 
-        GameState.GameStatus newStatus = evaluateGameStatus(newState);
-        newState.setStatus(newStatus);
+        newState.setStatus(evaluateGameStatus(newState));
         return newState;
     }
 
+    /**
+     * Promotes piece to king if it reaches the opposite end.
+     * BLACK promotes at row 0 (top), RED promotes at row 7 (bottom).
+     */
     private static void checkAndPromote(Board board, int row, int col) {
-        Piece piece = board.getPieceAt(row, col);
-        if (piece == null) return;
-        if (piece.getColor() == Piece.Color.RED && row == 7) piece.makeKing();
-        else if (piece.getColor() == Piece.Color.BLACK && row == 0) piece.makeKing();
+        Piece p = board.getPieceAt(row, col);
+        if (p == null) return;
+        if (p.getColor() == Piece.Color.BLACK && row == 0) p.makeKing();
+        else if (p.getColor() == Piece.Color.RED && row == 7) p.makeKing();
     }
 
+    /**
+     * Evaluates game status: winner or still playing.
+     */
     public static GameState.GameStatus evaluateGameStatus(GameState state) {
         Board board = state.getBoard();
-        Piece.Color currentTurn = state.getCurrentTurn();
+        int red = board.getPieceCount(Piece.Color.RED);
+        int black = board.getPieceCount(Piece.Color.BLACK);
 
-        int redCount = board.getPieceCount(Piece.Color.RED);
-        int blackCount = board.getPieceCount(Piece.Color.BLACK);
+        if (red == 0) return GameState.GameStatus.BLACK_WINS;
+        if (black == 0) return GameState.GameStatus.RED_WINS;
 
-        if (redCount == 0) return GameState.GameStatus.BLACK_WINS;
-        if (blackCount == 0) return GameState.GameStatus.RED_WINS;
-
-        List<Move> movesForCurrentPlayer = getAllValidMovesForPlayer(board, currentTurn);
-        if (movesForCurrentPlayer.isEmpty()) {
-            return (currentTurn == Piece.Color.RED) ? GameState.GameStatus.BLACK_WINS : GameState.GameStatus.RED_WINS;
+        Piece.Color turn = state.getCurrentTurn();
+        if (getAllValidMovesForPlayer(board, turn).isEmpty()) {
+            return (turn == Piece.Color.RED) ? GameState.GameStatus.BLACK_WINS : GameState.GameStatus.RED_WINS;
         }
-
-        // در صورت نیاز می‌توان شرایط تساوی (مثلاً تکرار حرکت) را اضافه کرد
         return GameState.GameStatus.PLAYING;
     }
 
+    /**
+     * Returns movement directions based on piece type and color.
+     * Normal pieces move forward only; kings move in all four diagonal directions.
+     */
     private static int[][] getMoveDirections(Piece piece) {
         if (piece.isKing()) {
-            return new int[][]{{-1,-1}, {-1,1}, {1,-1}, {1,1}};
+            return new int[][]{{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
         } else {
-            int forward = piece.getForwardDirection();
-            return new int[][]{{forward, -1}, {forward, 1}};
+            int f = piece.getForwardDirection(); // BLACK = -1, RED = +1
+            return new int[][]{{f, -1}, {f, 1}};
         }
     }
 }
