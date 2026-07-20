@@ -7,8 +7,7 @@ import java.util.Scanner;
 
 
 
-// این فایل جهت تست اجرای صحیح کد نوشته شده
-
+// This file was created to test the execution of correct code.
 
 
 public class Main {
