@@ -3,14 +3,21 @@ package Graphic;
 import javax.sound.sampled.*;
 import java.io.File;
 
-public class MusicManager {
-    private static Clip menuMusic;
-    private static Clip gameMusic;
-    private static boolean isMenuMuted = false;
-    private static boolean isGameMuted = false;
-    private static boolean isMenuMusicPlaying = false;
-    private static boolean isGameMusicPlaying = false;
+/**
+ * Expected file names:
+ * - menu_music.wav or menu_music.mp3
+ * - game_music.wav or game_music.mp3
+ */
 
+
+public class MusicManager {
+    private static Clip menuMusic, gameMusic;
+    private static boolean isMenuMuted = false, isGameMuted = false;
+    private static boolean isMenuMusicPlaying = false, isGameMusicPlaying = false;
+
+    /**
+     * Starts playing menu music if not already playing or muted.
+     */
     public static void playMenuMusic() {
         if (isMenuMusicPlaying || isMenuMuted) return;
         stopMusic(menuMusic);
@@ -41,6 +48,11 @@ public class MusicManager {
             }
         }
     }
+
+    /**
+     * Starts playing game music if not already playing or muted.
+     * Typically called when a game session begins.
+     */
 
     public static void playGameMusic() {
         if (isGameMusicPlaying || isGameMuted) return;
@@ -73,38 +85,31 @@ public class MusicManager {
         }
     }
 
-    public static boolean isMenuMuted() {
-        return isMenuMuted;
-    }
+    public static boolean isMenuMuted() { return isMenuMuted; }
+    public static boolean isGameMuted() { return isGameMuted; }
 
-    public static boolean isGameMuted() {
-        return isGameMuted;
-    }
 
-    private static Clip loadMusic(String wavName, String mp3Name) {
+
+    private static Clip loadMusic(String wav, String mp3) {
         try {
-            java.net.URL url = MusicManager.class.getResource(wavName);
+            java.net.URL url = MusicManager.class.getResource(wav);
+            if (url == null) url = MusicManager.class.getResource(mp3);
             if (url == null) {
-                url = MusicManager.class.getResource(mp3Name);
-            }
-            if (url == null) {
-                File file = new File(wavName);
-                if (!file.exists()) file = new File(mp3Name);
-                if (file.exists()) {
-                    AudioInputStream audioStream = AudioSystem.getAudioInputStream(file);
+                File f = new File(wav);
+                if (!f.exists()) f = new File(mp3);
+                if (f.exists()) {
+                    AudioInputStream ais = AudioSystem.getAudioInputStream(f);
                     Clip clip = AudioSystem.getClip();
-                    clip.open(audioStream);
+                    clip.open(ais);
                     return clip;
-                } else {
-                    System.err.println("Music file not found: " + wavName + " or " + mp3Name);
-                    return null;
                 }
-            } else {
-                AudioInputStream audioStream = AudioSystem.getAudioInputStream(url);
-                Clip clip = AudioSystem.getClip();
-                clip.open(audioStream);
-                return clip;
+                System.err.println("Music not found: " + wav + " or " + mp3);
+                return null;
             }
+            AudioInputStream ais = AudioSystem.getAudioInputStream(url);
+            Clip clip = AudioSystem.getClip();
+            clip.open(ais);
+            return clip;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
