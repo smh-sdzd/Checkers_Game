@@ -279,8 +279,8 @@ public class MainMenu extends JFrame {
         bottom.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
         String playerLabelText = mode.equals("local") ?
-                "Player 1: " + player1.getName() + " (Black)  |  Player 2: " + player2.getName() + " (Red)" :
-                "Player: " + player1.getName() + " (Black)";
+                "Player 1: " + player1.getName() + " (" + getColorName(true) + ")  |  Player 2: " + player2.getName() + " (" + getColorName(false) + ")" :
+                "Player: " + player1.getName() + " (" + getColorName(true) + ")";
 
         JLabel nameLabel = new JLabel(playerLabelText);
         nameLabel.setFont(new Font("Pristina", Font.PLAIN, 20));
@@ -400,8 +400,8 @@ public class MainMenu extends JFrame {
             bottom.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
             String playerLabelText = loadedMode.equals("local") ?
-                    "Player 1: " + player1.getName() + " (Black)  |  Player 2: " + player2.getName() + " (Red)" :
-                    "Player: " + player1.getName() + " (Black)";
+                    "Player 1: " + player1.getName() + " (" + getColorName(true) + ")  |  Player 2: " + player2.getName() + " (" + getColorName(false) + ")" :
+                    "Player: " + player1.getName() + " (" + getColorName(true) + ")";
 
             JLabel nameLabel = new JLabel(playerLabelText);
             nameLabel.setFont(new Font("Pristina", Font.PLAIN, 20));
@@ -698,6 +698,20 @@ public class MainMenu extends JFrame {
         });
         return btn;
     }
+
+
+    /**
+     * Returns the color name based on current theme and piece color.
+     * Classic: Black/Red, Modern: Silver/Gold
+     */
+    private String getColorName(boolean isBlack) {
+        if (currentTheme == Theme.CLASSIC) {
+            return isBlack ? "Black" : "Red";
+        } else {
+            return isBlack ? "Silver" : "Gold";
+        }
+    }
+
 
     private void handleButtonAction(String cmd) {
         switch (cmd) {
